@@ -1,20 +1,78 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { StatusBar as ExpoStatusBar } from "expo-status-bar";
+import React from "react";
+import { Text } from "react-native";
+import { ThemeProvider } from "styled-components/native";
+import {
+  useFonts as useOswald,
+  Oswald_400Regular,
+} from "@expo-google-fonts/oswald";
 
-export default function App() {
+import { useFonts as useLato, Lato_400Regular } from "@expo-google-fonts/lato";
+
+import { theme } from "./src/infrastructure/theme";
+import { RestaurantsScreen } from "./src/features/restaurants/screens/restaurants.screen";
+import { MapsScreen } from "./src/features/restaurants/screens/maps.screen";
+import { SettingsScreen } from "./src/features/restaurants/screens/settings.screen";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { NavigationContainer } from "@react-navigation/native";
+import { Ionicons } from "@expo/vector-icons";
+
+const Tab = createBottomTabNavigator();
+
+const TAB_ICON = {
+  Restaurants: "md-restaurant",
+  Map: "md-map",
+  Settings: "md-settings",
+};
+
+const createScreenOptions = ({ route }) => {
+  const iconName = TAB_ICON[route.name];
+  return {
+    tabBarIcon: ({ size, color }) => (
+      <Ionicons name={iconName} size={size} color={color} />
+    )}
+  }
+
+const Map = () => <Text>Map</Text>;
+const Settings = () => <Text>Settiasasngs</Text>;
+
+function MyTabs() {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <Tab.Navigator
+      screenOptions={createScreenOptions}
+      tabBarOptions={{
+        activeTintColor: "tomato",
+        inactiveTintColor: "gray",
+      }}
+    >
+      <Tab.Screen name="Restaurants" component={RestaurantsScreen} />
+      <Tab.Screen name="Map" component={Map} />
+      <Tab.Screen name="Settings" component={Settings} />
+    </Tab.Navigator>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
+export default function App() {
+  const [oswaldLoaded] = useOswald({
+    Oswald_400Regular,
+  });
+
+  const [latoLoaded] = useLato({
+    Lato_400Regular,
+  });
+
+  if (!oswaldLoaded || !latoLoaded) {
+    return null;
+  }
+
+  return (
+    <>
+      <ThemeProvider theme={theme}>
+        <NavigationContainer>
+          <MyTabs />
+        </NavigationContainer>
+      </ThemeProvider>
+      <ExpoStatusBar style="auto" />
+    </>
+  );
+}
